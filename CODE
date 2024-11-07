@@ -1,0 +1,97 @@
+create database library;
+use library;
+
+create table branch (branch_no int primary key,manager_id int,branch_address varchar(255),contact_no varchar(20));
+
+create table employee (emp_id int primary key,emp_name varchar(100),position varchar(50),salary decimal(10, 2),branch_no int,
+  foreign key (branch_no) references branch(branch_no));
+
+create table books (isbn varchar(20) primary key,book_title varchar(200),category varchar(50),rental_price decimal(10, 2),
+status varchar(10) check(status in ('yes', 'no')),author varchar(100),publisher varchar(100));
+
+create table customer (customer_id int primary key,customer_name varchar(100),customer_address varchar(255),reg_date date
+);
+
+create table issuestatus (
+  issue_id int primary key,
+  issued_cust int,
+  issued_book_name varchar(200),
+  issue_date date,
+  isbn_book varchar(20),
+  foreign key (issued_cust) references customer(customer_id),
+  foreign key (isbn_book) references books(isbn)
+);
+
+create table returnstatus (
+  return_id int primary key,
+  return_cust int,
+  return_book_name varchar(200),
+  return_date date,
+  isbn_book2 varchar(20),
+  foreign key (isbn_book2) references books(isbn));
+
+insert into branch values
+(1, 1, 'Main Branch', '1234567890'),
+(2, 2, 'Downtown Branch', '9876543210'),
+(3, 3, 'University Branch', '5551112222');
+
+insert into employee values
+(1, 'Sunil Kumar', 'Manager', 60000.00, 1),
+(2, 'Reshma Sunil', 'Assistant', 40000.00, 1),
+(3, 'Aadilakshmi', 'Manager', 70000.00, 2),
+(4, 'Sitalakshmi', 'Librarian', 50000.00, 3),
+(5, 'Luna', 'Assistant', 45000.00, 2);
+
+insert into books values
+('ISBN123', 'Oru Sankeerthanam Poyi', 'Fiction', 10.99, 'yes', 'Perumbadavam Sreedharan', 'DC Books'),
+('ISBN456', 'Aarachar', 'Fiction', 12.99, 'yes', 'K. R. Meera', 'Mathrubhumi Books'),
+('ISBN789', 'Manushyanu Oru Aamukham', 'Non-Fiction', 9.99, 'yes', 'M. T. Vasudevan Nair', 'Current Books'),
+('ISBN012', 'Randidangazhi', 'Fiction', 11.99, 'no', 'Thakazhi Sivasankara Pillai', 'Sahitya Pravarthaka Cooperative Society'),
+('ISBN345', 'Adhyathe Katha', 'Fiction', 14.99, 'yes', 'Basheer', 'Poorna Publications');
+
+insert into customer values
+(1, 'Anoop Menon', 'TC 12/345(3)', '2022-01-01'),
+(2, 'Dhanya Mary Varghese', 'P.O. Box 123', '2022-02-01'),
+(3, 'Fahad Fazil', 'House No. 456', '2022-03-01'),
+(4, 'Geetha Salam', 'Door No. 789', '2022-04-01'),
+(5, 'Kavya Madhavan', 'Flat No. 901', '2022-05-01');
+
+insert into issuestatus values
+(1, 1, 'Oru Sankeerthanam Poyi', '2023-06-01', 'ISBN123'),
+(2, 2, 'Aarachar', '2023-06-05', 'ISBN456'),
+(3, 3, 'Manushyanu Oru Aamukham', '2023-06-10', 'ISBN789'),
+(4, 4, 'Randidangazhi', '2023-06-15', 'ISBN012'),
+(5, 5, 'Adhyathe Katha', '2023-06-20', 'ISBN345');
+select*from issuestatus;
+
+insert into employee values
+(1, 'Sreekumar', 'Librarian', 30000.00, 1),
+(2, 'Rajesh', 'Assistant', 25000.00, 1),
+(3, 'Latha', 'Manager', 40000.00, 2),
+(4, 'Vineeth', 'Librarian', 35000.00, 2),
+(5, 'Soumya', 'Assistant', 28000.00, 3);
+
+select book_title, category, rental_price from books where status = 'yes';
+ 
+select emp_name, salary from employee order by salary desc;
+
+select b.book_title, c.customer_name from books b join issuestatus i on b.isbn = i.isbn_book join customer c on i.issued_cust = c.customer_id;
+
+select category, count(*) as book_count from books group by category;
+
+select emp_name, position from employee where salary > 50000;
+
+select customer_name from customer where reg_date < '2022-01-01' and customer_id not in (select issued_cust from issuestatus);
+
+select b.branch_no, count(*) as employee_count from branch b join employee e on b.branch_no = e.branch_no group by b.branch_no;
+
+select c.customer_name from customer c join issuestatus i on c.customer_id = i.issued_cust 
+where extract(month from i.issue_date) = 6 and extract(year from i.issue_date) = 2023;
+
+select book_title from books where category = 'history';
+
+select b.branch_no, count(*) as employee_count from branch b join employee e on b.branch_no = e.branch_no group by b.branch_no having count(*) > 5;
+
+select e.emp_name, b.branch_address from employee e join branch b on e.emp_id = b.manager_id;
+
+select c.customer_name from customer c join issuestatus i on c.customer_id = i.issued_cust join books b on i.isbn_book = b.isbn where b.rental_price > 25;
